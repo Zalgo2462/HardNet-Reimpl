@@ -1,4 +1,11 @@
+from MinBatchNegativeMiner import MinBatchNegativeMiner
+
+from HardNet import HardNet
+from HardNetModule import HardNetModule
+
+
 def main():
+    hard_net = HardNet(MinBatchNegativeMiner(), HardNetModule())
     pass
 
 

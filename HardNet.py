@@ -1,15 +1,17 @@
 import torch.cuda
 import torch.utils.data
 
-from HardNetModule import HardNetModule
-
 
 class HardNet:
-    def __init__(self):
+    def __init__(self, miner, hard_net_module, model_path):
         """
         type: (HardNet)->None
         """
-        self.module = HardNetModule()
+        self.__module = hard_net_module
+        self.__NegativeMiner = miner
+        self.__model_path = model_path
+        self.__total_epochs = -1
+        self.__current_epoch = -1
 
     @staticmethod
     def __init_training_loader(training_set, batch_size, data_path, num_workers=0, pin_memory=True):
@@ -42,6 +44,23 @@ class HardNet:
         test_loader = torch.utils.data.DataLoader()
 
         return test_loader
+
+    def save_checkpoint(self):
+        """
+        type: (HardNet)->None
+        TODO: commenting and implementation
+        :return:
+        """
+        pass
+
+    def load_checkpoint(self, checkpoint_path):
+        """
+        type: (HardNet, str)->None
+        TODO: commenting and implementation
+        :param checkpoint:
+        :return:
+        """
+        pass
 
     def train(self, logger):
         """
