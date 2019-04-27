@@ -2,12 +2,11 @@ class Logger:
     def __init__(self):
         pass
 
-    def log(self, key, value, epoch):
+    def log(self, log_data, epoch):
         """
-        type: (Logger, str, float, int)->None
+        type: (Logger, Dict[str, Any], int)->None
         TODO: commenting
-        :param key:
-        :param value:
+        :param log_data:
         :param epoch:
         """
         pass
