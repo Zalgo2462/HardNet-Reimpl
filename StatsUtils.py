@@ -1,0 +1,2 @@
+class StatsUtils:
+    pass
