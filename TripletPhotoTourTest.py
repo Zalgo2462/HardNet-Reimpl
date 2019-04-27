@@ -1,4 +1,4 @@
-import TripletPhotoTour
+from TripletPhotoTour import TripletPhotoTour
 
 
 class TripletPhotoTourTest(TripletPhotoTour):

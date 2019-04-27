@@ -1,4 +1,4 @@
-import Loss
+from Loss import Loss
 
 
 class LossHardNet(Loss):
