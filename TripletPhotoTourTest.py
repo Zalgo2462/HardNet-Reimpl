@@ -2,13 +2,14 @@ from TripletPhotoTour import TripletPhotoTour
 
 
 class TripletPhotoTourTest(TripletPhotoTour):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, batch_size, *args, **kwargs):
         """
         TODO: finish commenting and implement
+        :param batch_size:
         :param args:
         :param kwargs:
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(batch_size, *args, **kwargs)
 
     def __getitem__(self, item):
         """
