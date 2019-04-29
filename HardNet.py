@@ -4,8 +4,8 @@ from torch.utils.data import DataLoader
 
 from HardNetModule import HardNetModule
 from Logger import Logger
-from TripletPhotoTourTest import TripletPhotoTourTest
-from TripletPhotoTourTrain import TripletPhotoTourTrain
+from PairPhotoTourTest import PairPhotoTourTest
+from PairPhotoTourTrain import PairPhotoTourTrain
 
 
 class HardNet:
@@ -41,8 +41,8 @@ class HardNet:
         if torch.cuda.is_available():
             kwargs = {'num_workers': num_workers, 'pin_memory': pin_memory}
 
-        return TripletPhotoTourTrain(batch_size, data_root=data_path, download=True,
-                                     name=training_set).get_data_loader(kwargs)
+        return PairPhotoTourTrain(batch_size, data_root=data_path, download=True,
+                                  name=training_set).get_data_loader(kwargs)
 
     @staticmethod
     def __init_testing_loader(testing_set, batch_size, data_path, num_workers=0, pin_memory=True):
@@ -63,7 +63,7 @@ class HardNet:
         if torch.cuda.is_available():
             kwargs = {'num_workers': num_workers, 'pin_memory': pin_memory}
 
-        return TripletPhotoTourTest(batch_size, data_root=data_path, name=testing_set, download=True).get_data_loader(
+        return PairPhotoTourTest(batch_size, data_root=data_path, name=testing_set, download=True).get_data_loader(
             kwargs)
 
     def save_checkpoint(self):
