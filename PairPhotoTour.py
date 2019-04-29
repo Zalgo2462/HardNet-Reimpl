@@ -5,6 +5,8 @@ from torchvision.datasets import PhotoTour
 
 
 class PairPhotoTour(PhotoTour):
+    NAMES = ['liberty', 'notredame', 'yosemite']
+
     def __init__(self, batch_size, data_root, name, train, transform, download):
         # type: (PairPhotoTour, int, str, str, bool, Callable, bool)->None
         """
