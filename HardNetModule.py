@@ -5,18 +5,19 @@ import torch.optim as optim
 class HardNetModule(nn.Module):
 
     def __init__(self):
+        # type: (HardNetModule)-> None
         """
-        type: (HardNetModule)-> None
-
-        Construct a new HardNet model object
+        Construct a new HardNetModule object that will be responsible for holding the
+        NN layers and providing access to optimizer variants.
         """
         super().__init__()
         self.model = self.__init_model()
         self.model.apply(self.__weight_init)
 
     def get_adam_optimizer(self, learning_rate, weight_decay):
+        # type: (HardNetModule, float, float)->optim.Optimizer
         """
-        type: (HardNetModule, float, float)->optimizer.Optimizer
+
 
         TODO: finish commenting
         :return:
@@ -26,8 +27,9 @@ class HardNetModule(nn.Module):
         return optimizer
 
     def get_sgd_optimizer(self, learning_rate, weight_decay, momentum=0.9, dampening=0.9):
+        # type: (HardNetModule, float, float, float, float)->optim.Optimizer
         """
-        type: (HardNetModule, float, float, float, float)->optimizer.Optimizer
+
         TODO: finish commenting
         :param learning_rate:
         :param weight_decay:
@@ -44,8 +46,9 @@ class HardNetModule(nn.Module):
 
     @staticmethod
     def __init_model():
+        # type: ()-> nn.Sequential
         """
-        type: ()-> nn.Sequential
+
 
         Create the HardNet neural network layers
         """
@@ -75,8 +78,9 @@ class HardNetModule(nn.Module):
 
     @staticmethod
     def __weight_init(module):
+        # type: (nn.Module)-> None
         """
-        type: (nn.Module)-> None
+
         :param module: The PyTorch Module to initialize
         """
         if isinstance(module, nn.Conv2d):
