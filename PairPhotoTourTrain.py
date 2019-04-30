@@ -27,7 +27,7 @@ class PairPhotoTourTrain(PairPhotoTour):
         :param log_cycle: number of batches between logging events during training
         """
         tx = transforms.Compose([
-            transforms.Lambda(lambda x: np.reshape(x, {64, 64, 1})),
+            transforms.Lambda(lambda x: np.reshape(x, (64, 64, 1))),
             transforms.ToPILImage(),
             transforms.RandomRotation(5, PIL.Image.BILINEAR),
             transforms.RandomResizedCrop(32, scale=(0.9, 1.0), ratio=(0.9, 1.1)),
@@ -122,8 +122,8 @@ class PairPhotoTourTrain(PairPhotoTour):
             img_a = img_a.permute(0, 2, 1)
             img_p = img_p.permute(0, 2, 1)
         if do_flip:
-            img_a = torch.flip(img_a.numpy(), (2,))
-            img_p = torch.flip(img_p.numpy(), (2,))
+            img_a = torch.flip(img_a, (2,))
+            img_p = torch.flip(img_p, (2,))
         return img_a, img_p
 
     def __len__(self):

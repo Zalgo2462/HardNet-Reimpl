@@ -20,7 +20,7 @@ class PairPhotoTourTest(PairPhotoTour):
         :param download: whether or not to download samples if they are not already present
         """
         tx = transforms.Compose([
-            transforms.Lambda(lambda x: np.reshape(x, {64, 64, 1})),
+            transforms.Lambda(lambda x: np.reshape(x, (64, 64, 1))),
             transforms.ToPILImage(),
             transforms.Resize(32),
             transforms.ToTensor()  # has the side effect of reordering dimensions to CxHxW

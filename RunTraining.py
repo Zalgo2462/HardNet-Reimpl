@@ -15,6 +15,9 @@ from SGDOptimizerFactory import SGDOptimizerFactory
 
 
 def main():
+    if !torch.cuda.is_available():
+        print("CUDA is not available. Using CPU.")
+
     training_set_name = 'liberty'
     testing_set_names = [name for name in PairPhotoTour.NAMES if name != training_set_name]
     batch_size = 1024

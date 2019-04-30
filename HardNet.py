@@ -95,7 +95,11 @@ class HardNet:
         def lr_schedule_fun(batch_idx):
             return 1.0 - batch_idx / total_num_batches
 
-        lr_scheduler = LambdaLR(optimizer, lr_schedule_fun, self.__current_epoch * num_batches_per_epoch)
+        lr_scheduler = LambdaLR(optimizer, lr_schedule_fun, -1)
+
+        # set the scheduler to the current epoch
+        for i in range(-1, self.__current_epoch * num_batches_per_epoch):
+            lr_scheduler.step()
 
         start_epoch = self.__current_epoch
         for epoch in range(start_epoch, end_epoch):
