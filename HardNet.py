@@ -190,9 +190,9 @@ class HardNet:
                         )
                     )
 
-                    distances.append(dists.data.cpu().numpy().reshape(1, -1))
+                    distances.append(dists.data.cpu().numpy().flatten())
 
-                    labels.append(batch_labels.data.cpu().numpy().reshape(1, -1))
+                    labels.append(batch_labels.data.cpu().numpy().flatten())
 
                     if logger is not None and batch_index % log_cycle == 0:
                         # log the loss if the logger exists
