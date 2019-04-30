@@ -1,3 +1,4 @@
+import os
 import typing
 
 import numpy as np
@@ -31,24 +32,32 @@ class HardNet:
         if torch.cuda.is_available():
             self.__module = self.__module.cuda()
 
-    def save_checkpoint(self):
-        # type: (HardNet)->None
+    def save_checkpoint(self, experiment_tag):
+        # type: (HardNet, str)->None
         """
+        Save a checkpoint of the module so that training can resume from the current state.
 
-        TODO: commenting and implementation
-        :return:
+        :param experiment_tag: added to checkpoint directory as a suffix
         """
-        pass
+        try:
+            os.makedirs('{0}{1}'.format(self.__model_path, experiment_tag))
+        except FileExistsError:
+            pass
+
+        torch.save({'epoch': self.__current_epoch + 1, 'state_dict': self.__module.state_dict()},
+                   '{}{}/checkpoint_{}.pth'.format(self.__model_path, experiment_tag, self.__current_epoch))
 
     def load_checkpoint(self, checkpoint_path):
         # type: (HardNet, str)->None
         """
-
-        TODO: commenting and implementation
-        :param checkpoint_path:
-        :return:
+        Attempts to load the starting epoch and state dictionary from the provided file path. If the load
+        fails, the proper exception will be raised. If the load succeeds the HardNetModule will be updated
+        to match the state dictionary retrieved and the current epoch will equal the one that was saved.
+        :param checkpoint_path: path to find the checkpoint file at
         """
-        pass
+        checkpoint = torch.load(checkpoint_path)
+        self.__current_epoch = checkpoint['epoch']
+        self.__module.load_state_dict(checkpoint['state_dict'])
 
     def train(
             self,  # type: HardNet
@@ -57,6 +66,7 @@ class HardNet:
             optimizer_factory,  # type: AbstractOptimizerFactory
             hardnet_loss,  # type: LossHardNet
             end_epoch,  # type:  int
+            experiment_tag,  # type: str
             logger  # type: Logger
     ):
         # type: (...)->None
@@ -68,6 +78,7 @@ class HardNet:
         :param optimizer_factory: creates the optimizer to use while training
         :param hardnet_loss: loss object to score with
         :param end_epoch: epoch to end training at
+        :param experiment_tag: string appended to the checkpoint directory name
         :param logger: A logger to record training progress
         """
 
@@ -90,10 +101,15 @@ class HardNet:
         for epoch in range(start_epoch, end_epoch):
             self.__train_epoch(epoch, training_loader, optimizer, hardnet_loss, lr_scheduler, logger)
 
+            # save the checkpoint for this epoch
+            self.save_checkpoint(experiment_tag)
+
             for testing_loader in testing_loaders:
                 self.__test_epoch(epoch, testing_loader, logger)
 
             training_loader = training_loader_factory.get_dataloader()
+
+            self.__current_epoch += 1
 
     def __train_epoch(self, epoch, training_loader, optimizer, hardnet_loss, lr_scheduler, logger):
         # type: (HardNet, int, DataLoader, Optimizer, LossHardNet,LambdaLR, Logger)->None
@@ -126,18 +142,6 @@ class HardNet:
             # if logger is not None:
             #     # log the loss if the logger exists
             #     logger.log('loss', loss_value,)
-            #
-            # # TODO: (try to) create the model dir if it doesn't exist
-            # try:
-            #     # TODO: specify suffix
-            #     os.stat('{0}{1}'.format(self.__model_path, suffix))
-            # # TODO: specify more specific exception
-            # except Exception as e:
-            #     # TODO: specify suffix
-            #     os.makedirs('{0}{1}'.format(self.__model_path, suffix))
-            #
-            # # save the checkpoint for this epoch
-            # self.save_checkpoint()
 
     def __test_epoch(self, epoch, testing_loader, logger):
         # type: (HardNet, int, DataLoader, Logger)->None
