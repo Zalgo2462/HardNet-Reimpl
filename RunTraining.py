@@ -1,3 +1,4 @@
+import os
 import typing
 
 import torch.cuda
@@ -34,7 +35,7 @@ def main():
 
     experiment_tag = os.environ["HOSTNAME"] + "_run_1"
     hard_net.train(training_loader_factory, testing_loader_factories, optimizer_factory, loss_triplet_margin, 10,
-                   , logger_console, 100)
+                   experiment_tag, logger_console, 100)
 
     return
 
