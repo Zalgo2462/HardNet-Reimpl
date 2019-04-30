@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from torch import Tensor
 
 
@@ -13,37 +12,16 @@ class HardNetModule(nn.Module):
         NN layers and providing access to optimizer variants.
         """
         super().__init__()
-        self.model = self.__init_model()
-        self.model.apply(self.__weight_init)
+        self.__model = self.__init_model()
+        self.__model.apply(self.__weight_init)
 
-    def get_adam_optimizer(self, learning_rate, weight_decay):
-        # type: (HardNetModule, float, float)->optim.Optimizer
+    def get_model(self):
+        # type: (HardNetModule) -> nn.Module
         """
-        Returns an ADAM optimizer with the given parameters
-        :param learning_rate: The initial learning rate for the optimizer
-        :param weight_decay: The weight decay coefficient to use with the optimizer
-        :return: ADAM optimizer with the appropriate parameters
+        Returns the nn layers used in the HardNetModule
+        :return: the nn layers which make up the HardNetModule
         """
-        optimizer = optim.Adam(self.model.parameters(), lr=learning_rate,
-                               weight_decay=weight_decay)
-        return optimizer
-
-    def get_sgd_optimizer(self, learning_rate, weight_decay, momentum=0.9, dampening=0.9):
-        # type: (HardNetModule, float, float, float, float)->optim.Optimizer
-        """
-        Returns a standard SGD optimizer with the given parameters
-        :param learning_rate: The initial learning rate for the optimizer
-        :param weight_decay: The weight decay coefficient to use with the optimizer
-        :param momentum: The momentum coefficient to use with SGD
-        :param dampening: Dampening for momentum
-        :return: SGD optimizer with the appropriate parameters
-        """
-
-        optimizer = optim.SGD(self.model.parameters(), lr=learning_rate,
-                              momentum=momentum, dampening=dampening,
-                              weight_decay=weight_decay)
-
-        return optimizer
+        return self.__model
 
     @staticmethod
     def __init_model():
@@ -153,7 +131,7 @@ class HardNetModule(nn.Module):
         :param input_data: A batch of 32x32x1 images
         :return: Batch size x 128 matrix of image descriptors
         """
-        model_output = self.model(HardNetModule.input_norm(input_data))
+        model_output = self.__model(HardNetModule.input_norm(input_data))
 
         # reduce the size to batch size x 128
         reshaped_output = model_output.view(model_output.size(0), -1)
