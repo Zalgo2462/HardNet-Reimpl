@@ -1,12 +1,12 @@
-class Logger:
-    def __init__(self):
-        pass
+from typing import Dict, Any
 
-    def log(self, log_data, epoch):
+
+class Logger:
+
+    def log(self, log_data):
+        # type: (Logger, Dict[str, Any])->None
         """
-        type: (Logger, Dict[str, Any], int)->None
-        TODO: commenting
-        :param log_data:
-        :param epoch:
+        Base implementation of log function for Loggers.
+        :param log_data: dictionary of key-value pairs to log
         """
         pass

@@ -34,7 +34,7 @@ def __init_training_loader_factory(training_set, batch_size, data_path):
     :param batch_size: number of anchor/positive pairs to include in a batch
     :param data_path: path to save data to or to read cached data from
     :return: The AbstractDataloaderFactory that will create Dataloaders which
-             provide training pairs in pairs of batch size x 32 x 32 x 1 tensors
+             provide training pairs in pairs of batch size x 1 x 32 x 32 tensors
     """
     kwargs = {}
     # TODO: direct call to is_available might be replaced
@@ -56,7 +56,7 @@ def __init_testing_loader_factories(testing_sets, batch_size, data_path):
     :param batch_size: number of anchor/positive pairs to include in a batch
     :param data_path: path to save data to or to read cached data from
     :return: The AbstractDataloaderFactories that will create Dataloaders which
-             provide testing samples in pairs of batch size x 32 x 32 x 1 tensors
+             provide testing samples in pairs of batch size x 1 x 32 x 32 tensors
     """
     kwargs = {}
     # TODO: direct call to is_available might be replaced

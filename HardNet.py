@@ -67,12 +67,13 @@ class HardNet:
             hardnet_loss,  # type: LossHardNet
             end_epoch,  # type:  int
             experiment_tag,  # type: str
-            logger  # type: Logger
+            logger,  # type: Logger
+            log_cycle,  # type: int
     ):
         # type: (...)->None
         """
         :param training_loader_factory: A Dataloader factory which creates Dataloaders which return training pairs
-               in pairs of batch size x 32 x 32 x 1 tensors
+               in pairs of batch size x 1 x 32 x 32 tensors
         :param testing_loader_factories: A list of Dataloader factories which create Dataloaders which return test pairs
                in the same format as training_loader
         :param optimizer_factory: creates the optimizer to use while training
@@ -80,6 +81,7 @@ class HardNet:
         :param end_epoch: epoch to end training at
         :param experiment_tag: string appended to the checkpoint directory name
         :param logger: A logger to record training progress
+        :param log_cycle: number of batches between logging events during training
         """
 
         training_loader = training_loader_factory.get_dataloader()
@@ -97,30 +99,31 @@ class HardNet:
 
         start_epoch = self.__current_epoch
         for epoch in range(start_epoch, end_epoch):
-            self.__train_epoch(epoch, training_loader, optimizer, hardnet_loss, lr_scheduler, logger)
+            self.__train_epoch(epoch, training_loader, optimizer, hardnet_loss, lr_scheduler, logger, log_cycle)
 
             # save the checkpoint for this epoch
             self.save_checkpoint(experiment_tag)
 
             for testing_loader in testing_loaders:
-                self.__test_epoch(epoch, testing_loader, logger)
+                self.__test_epoch(epoch, testing_loader, logger, log_cycle)
 
             training_loader = training_loader_factory.get_dataloader()
 
             self.__current_epoch += 1
 
-    def __train_epoch(self, epoch, training_loader, optimizer, hardnet_loss, lr_scheduler, logger):
-        # type: (HardNet, int, DataLoader, Optimizer, LossHardNet,LambdaLR, Logger)->None
+    def __train_epoch(self, epoch, training_loader, optimizer, hardnet_loss, lr_scheduler, logger, log_cycle):
+        # type: (HardNet, int, DataLoader, Optimizer, LossHardNet,LambdaLR, Logger, int)->None
         """
         :param epoch: current epoch being trained
-        :param training_loader: A dataloader which returns training pairs in pairs of batch size x 32 x 32 x 1 tensors
+        :param training_loader: A dataloader which returns training pairs in pairs of batch size x 1 x 32 x 32 tensors
         :param optimizer: optimizer to apply gradients with
         :param hardnet_loss: loss object to score with
         :param lr_scheduler: scheduler to manage reducing the learning_rate over steps
         :param logger: A logger to record training progress
+        :param log_cycle: number of batches between logging events during training
         """
         self.__module.train()
-        # TODO: find replacement for progress bar that was here
+        loss_value = None  # type: typing.Union[Tensor, None]
         for batch_index, (batch_anchors, batch_positives) in enumerate(training_loader):
             # TODO: replace direct check for cuda.is_available()
             if torch.cuda.is_available():
@@ -137,23 +140,25 @@ class HardNet:
 
             lr_scheduler.step()
 
-            # if logger is not None:
-            #     # log the loss if the logger exists
-            #     logger.log('loss', loss_value,)
+            if logger is not None and batch_index % log_cycle == 0:
+                # log the loss if the logger exists
+                logger.log({'epoch': epoch, 'loss_value': loss_value, 'batch_index': batch_index, 'mode': 'train'})
 
-    def __test_epoch(self, epoch, testing_loader, logger):
-        # type: (HardNet, int, DataLoader, Logger)->None
+        logger.log({'epoch': epoch, 'loss_value': loss_value, 'mode': 'train', 'reportable': True})
+
+    def __test_epoch(self, epoch, testing_loader, logger, log_cycle):
+        # type: (HardNet, int, DataLoader, Logger, int)->None
         """
         Run a single epoch of tests and report false positive rate through the provided logger.
         :param epoch: current epoch the net is running in
-        :param testing_loader: DataLoader which provides testing samples in pairs of batch size x 32 x 32 x 1 tensors
+        :param testing_loader: DataLoader which provides testing samples in pairs of batch size x 1 x 32 x 32 tensors
         :param logger: logging object to record false positive rates and other information
+        :param log_cycle:number of batches between logging events during training
         """
         self.__module.eval()
 
         distances, labels = [], []
 
-        # TODO: find replacement for progress bar that was here
         for batch_index, (batch_anchors, batch_positives, batch_labels) in enumerate(testing_loader):
             # TODO: replace direct check for cuda.is_available()
             if torch.cuda.is_available():
@@ -184,11 +189,13 @@ class HardNet:
 
             labels.append(batch_labels.cpu().numpy().reshape(1, -1))
 
-            # TODO: LOGGING
+            if logger is not None and batch_index % log_cycle == 0:
+                # log the loss if the logger exists
+                logger.log({'epoch': epoch, 'batch_index': batch_index, 'mode': 'test'})
 
         labels_combined = np.hstack(labels)
         distances_combined = np.hstack(distances)
 
         false_positive_rate = false_positive_rate_at_95_recall(labels_combined, distances_combined)
 
-        # TODO: LOGGING
+        logger.log({'epoch': epoch, 'FPR_at_95': false_positive_rate, 'mode': 'test', 'reportable': True})

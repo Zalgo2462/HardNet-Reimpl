@@ -76,8 +76,8 @@ class HardNetModule(nn.Module):
         """
         Normalizes each image in the input such that each image is 0 meaned
         and has a std deviation of 1
-        :param input_data: A batch size x 32 x 32 x 1 tensor of inputs
-        :return: A batch size x 32 x 32 x 1 tensor of normalized inputs
+        :param input_data: A batch size x 1 x 32 x 32 tensor of inputs
+        :return: A batch size x 1 x 32 x 32 tensor of normalized inputs
         """
         flat = input_data.view((input_data.size(0), -1))
         eps = 1e-10
@@ -128,7 +128,7 @@ class HardNetModule(nn.Module):
         """
         Runs the input through the neural network layers
 
-        :param input_data: A batch of 32x32x1 images
+        :param input_data: A batch of 1x32x32 images
         :return: Batch size x 128 matrix of image descriptors
         """
         model_output = self.__model(HardNetModule.input_norm(input_data))

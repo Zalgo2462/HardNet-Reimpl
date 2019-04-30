@@ -6,14 +6,15 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 
+from Logger import Logger
 from PairPhotoTour import PairPhotoTour
 
 
 class PairPhotoTourTrain(PairPhotoTour):
     NUM_PAIRS = 5_000_000
 
-    def __init__(self, batch_size, data_root, name, download):
-        # type: (PairPhotoTourTrain, int, str, str, bool)->None
+    def __init__(self, batch_size, data_root, name, download, logger, log_cycle):
+        # type: (PairPhotoTourTrain, int, str, str, bool, Logger, int)->None
         """
         Create a PairPhotoTourTrain dataset that can provide a DataLoader for passing train data
         into the network.
@@ -22,6 +23,8 @@ class PairPhotoTourTrain(PairPhotoTour):
         :param data_root: path to the location to save downloaded samples/retrieve cached samples
         :param name: name of the dataset to use for training
         :param download: whether or not to download samples if they are not already present
+        :param logger: A logger to record training progress
+        :param log_cycle: number of batches between logging events during training
         """
         tx = transforms.Compose([
             transforms.Lambda(lambda x: np.reshape(x, {64, 64, 1})),
@@ -29,16 +32,19 @@ class PairPhotoTourTrain(PairPhotoTour):
             transforms.RandomRotation(5, PIL.Image.BILINEAR),
             transforms.RandomResizedCrop(32, scale=(0.9, 1.0), ratio=(0.9, 1.1)),
             transforms.Resize(32),
-            transforms.ToTensor()])
+            transforms.ToTensor()  # has the side effect of reordering dimensions to CxHxW
+        ])
         super().__init__(batch_size, data_root=data_root, name=name, train=True, transform=tx, download=download)
-        self.__pairs = self.__generate_pairs(self.labels, self.NUM_PAIRS)
+        self.__pairs = self.__generate_pairs(self.labels, self.NUM_PAIRS, logger, log_cycle)
 
-    def __generate_pairs(self, labels, num_pairs):
-        # type: (torch.LongTensor, int)->torch.LongTensor
+    def __generate_pairs(self, labels, num_pairs, logger, log_cycle):
+        # type: (torch.LongTensor, int, Logger, int)->torch.LongTensor
         """
         Create the pairs of anchors and positives that will be combined into batches for training.
         :param labels: image indices and classes that will be reorganized into a dictionary for ease of use
         :param num_pairs: number of pairs to create for training
+        :param logger: A logger to record training progress
+        :param log_cycle: number of batches between logging events during training
         :return: A LongTensor containing all of the pairs generated, to be fed out by the DataLoader
         """
 
@@ -50,7 +56,6 @@ class PairPhotoTourTrain(PairPhotoTour):
 
         already_idxs = set()
 
-        # TODO: replace the tqdm call that was here previously
         for x in range(num_pairs):
             if len(already_idxs) >= self.__batch_size:
                 already_idxs = set()
@@ -69,6 +74,8 @@ class PairPhotoTourTrain(PairPhotoTour):
                 while n1 == n2:
                     n2 = np.random.randint(0, len(indices[c1]))
             pairs.append([indices[c1][n1], indices[c1][n2]])
+            if logger is not None and x % log_cycle == 0:
+                logger.log({'pair_num': x, 'num_pairs': num_pairs, 'mode': 'generate'})
 
         return torch.LongTensor(np.array(pairs))
 
@@ -115,7 +122,6 @@ class PairPhotoTourTrain(PairPhotoTour):
             img_a = img_a.permute(0, 2, 1)
             img_p = img_p.permute(0, 2, 1)
         if do_flip:
-            # TODO: MAKE SURE THIS FLIPS ON THE RIGHT AXIS
             img_a = torch.flip(img_a.numpy(), (2,))
             img_p = torch.flip(img_p.numpy(), (2,))
         return img_a, img_p

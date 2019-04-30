@@ -23,7 +23,8 @@ class PairPhotoTourTest(PairPhotoTour):
             transforms.Lambda(lambda x: np.reshape(x, {64, 64, 1})),
             transforms.ToPILImage(),
             transforms.Resize(32),
-            transforms.ToTensor()])
+            transforms.ToTensor()  # has the side effect of reordering dimensions to CxHxW
+        ])
         super().__init__(batch_size, data_root=data_root, name=name, train=False, transform=tx,
                          download=download)
 
