@@ -15,7 +15,7 @@ from SGDOptimizerFactory import SGDOptimizerFactory
 
 
 def main():
-    if !torch.cuda.is_available():
+    if not torch.cuda.is_available():
         print("CUDA is not available. Using CPU.")
 
     training_set_name = 'liberty'
