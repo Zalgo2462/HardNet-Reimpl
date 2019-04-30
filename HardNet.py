@@ -39,13 +39,12 @@ class HardNet:
 
         :param experiment_tag: added to checkpoint directory as a suffix
         """
-        try:
-            os.makedirs('{0}{1}'.format(self.__model_path, experiment_tag))
-        except FileExistsError:
-            pass
+        experiment_dir = '{}{}'.format(self.__model_path, experiment_tag)
+
+        os.makedirs(experiment_dir, exist_ok=True)
 
         torch.save({'epoch': self.__current_epoch + 1, 'state_dict': self.__module.state_dict()},
-                   '{}{}/checkpoint_{}.pth'.format(self.__model_path, experiment_tag, self.__current_epoch))
+                   '{}/checkpoint_{}.pth'.format(experiment_dir, self.__current_epoch))
 
     def load_checkpoint(self, checkpoint_path):
         # type: (HardNet, str)->None
@@ -129,11 +128,13 @@ class HardNet:
         self.__module.train()
         loss_value = None  # type: typing.Union[Tensor, None]
         for batch_index, (batch_anchors, batch_positives) in enumerate(training_loader):
+
             # TODO: replace direct check for cuda.is_available()
             if torch.cuda.is_available():
                 batch_anchors, batch_positives = batch_anchors.cuda(), batch_positives.cuda()
                 # TODO: determine if following line is needed
                 # batch_anchors, batch_positives = Variable(data_a), Variable(data_p)
+            
             out_anchors = self.__module(batch_anchors)
             out_positives = self.__module(batch_positives)
 
@@ -143,7 +144,7 @@ class HardNet:
             optimizer.step()
 
             lr_scheduler.step()
-
+            
             if logger is not None and batch_index % log_cycle == 0:
                 # log the loss if the logger exists
                 logger.log({'epoch': epoch, 'loss_value': loss_value, 'batch_index': batch_index, 'mode': 'train'})
@@ -160,42 +161,42 @@ class HardNet:
         :param log_cycle:number of batches between logging events during training
         """
         self.__module.eval()
-
         distances, labels = [], []
 
-        for batch_index, (batch_anchors, batch_positives, batch_labels) in enumerate(testing_loader):
-            # TODO: replace direct check for cuda.is_available()
-            if torch.cuda.is_available():
-                batch_anchors, batch_positives = batch_anchors.cuda(), batch_positives.cuda()
-                # TODO: determine if following line is needed
-                # batch_anchors, batch_positives = Variable(data_a), Variable(data_p)
-            out_anchors = self.__module(batch_anchors)  # type: Tensor
-            out_positives = self.__module(batch_positives)  # type: Tensor
+        with torch.no_grad():
+                for batch_index, (batch_anchors, batch_positives, batch_labels) in enumerate(testing_loader):
+                    # TODO: replace direct check for cuda.is_available()
+                    if torch.cuda.is_available():
+                        batch_anchors, batch_positives = batch_anchors.cuda(), batch_positives.cuda()
+                        # TODO: determine if following line is needed
+                        # batch_anchors, batch_positives = Variable(data_a), Variable(data_p)
+                    out_anchors = self.__module(batch_anchors)  # type: Tensor
+                    out_positives = self.__module(batch_positives)  # type: Tensor
 
-            # dists = torch.sqrt(torch.sum((out_anchors - out_positives) ** 2, 1))
-            dists = torch.sqrt(
-                torch.sum(
-                    torch.pow(
-                        torch.add(
-                            out_anchors,
-                            torch.mul(
-                                out_positives,
-                                -1.0
-                            )
-                        ),
-                        2.0
-                    ),
-                    (1,)
-                )
-            )
+                    # dists = torch.sqrt(torch.sum((out_anchors - out_positives) ** 2, 1))
+                    dists = torch.sqrt(
+                        torch.sum(
+                            torch.pow(
+                                torch.add(
+                                    out_anchors,
+                                    torch.mul(
+                                        out_positives,
+                                        -1.0
+                                    )
+                                ),
+                                2.0
+                            ),
+                            (1,)
+                        )
+                    )
 
-            distances.append(dists.cpu().numpy().reshape(1, -1))
+                    distances.append(dists.data.cpu().numpy().reshape(1, -1))
 
-            labels.append(batch_labels.cpu().numpy().reshape(1, -1))
+                    labels.append(batch_labels.data.cpu().numpy().reshape(1, -1))
 
-            if logger is not None and batch_index % log_cycle == 0:
-                # log the loss if the logger exists
-                logger.log({'epoch': epoch, 'batch_index': batch_index, 'mode': 'test'})
+                    if logger is not None and batch_index % log_cycle == 0:
+                        # log the loss if the logger exists
+                        logger.log({'epoch': epoch, 'batch_index': batch_index, 'mode': 'test'})
 
         labels_combined = np.hstack(labels)
         distances_combined = np.hstack(distances)

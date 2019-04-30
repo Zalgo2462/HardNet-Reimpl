@@ -11,7 +11,7 @@ from PairPhotoTour import PairPhotoTour
 
 
 class PairPhotoTourTrain(PairPhotoTour):
-    NUM_PAIRS = 5000000
+    NUM_PAIRS = 5 * 1024; #5000000
 
     def __init__(self, batch_size, data_root, name, download, logger, log_cycle):
         # type: (PairPhotoTourTrain, int, str, str, bool, Logger, int)->None

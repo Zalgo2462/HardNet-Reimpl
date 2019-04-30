@@ -13,7 +13,13 @@ def false_positive_rate_at_95_recall(true_labels, distances):
     recall_point = 0.95  # ratio of matching pairs to recover out of the total number of matching pairs
     # sort labels on computed distances (smaller distance indicates likely match)
     # if the classifier was perfect the array would consist of all 1's followed by all 0's
-    true_labels = true_labels[np.argsort(distances)]
+#    import psutil
+#    print(psutil.virtual_memory())
+    sort_idx = np.argsort(distances)
+#    print(psutil.virtual_memory())
+    true_labels2 = true_labels[sort_idx]
+    
+    os.exit(1)
 
     # The number of matching pairs required to achieve a recall rate equal to recall_point
     num_req_true_matches = recall_point * np.sum(true_labels)

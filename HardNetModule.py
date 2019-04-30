@@ -131,8 +131,9 @@ class HardNetModule(nn.Module):
         :param input_data: A batch of 1x32x32 images
         :return: Batch size x 128 matrix of image descriptors
         """
-        model_output = self.__model(HardNetModule.input_norm(input_data))
 
+        model_output = self.__model(HardNetModule.input_norm(input_data))
+        
         # reduce the size to batch size x 128
         reshaped_output = model_output.view(model_output.size(0), -1)
 
