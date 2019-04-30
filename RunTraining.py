@@ -33,7 +33,7 @@ def main():
     loss_triplet_margin = LossHardNetTripletMargin(1)
     hard_net = HardNet(HardNetModule(), model_path)
 
-    experiment_tag = os.environ["HOSTNAME"] + "_run_1"
+    experiment_tag = os.uname()[1] + "_run_1"
     hard_net.train(training_loader_factory, testing_loader_factories, optimizer_factory, loss_triplet_margin, 10,
                    experiment_tag, logger_console, 100)
 
