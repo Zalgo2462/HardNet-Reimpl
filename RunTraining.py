@@ -18,7 +18,7 @@ def main():
     model_path = 'data/models/'
 
     training_loader_factory = __init_training_loader_factory(training_set_name, batch_size, data_path)
-    testing_loader_factories = __init_testing_loader(testing_set_names, batch_size, data_path)
+    testing_loader_factories = __init_testing_loader_factories(testing_set_names, batch_size, data_path)
     hard_net = HardNet(HardNetModule(), model_path)
 
     pass
@@ -45,17 +45,17 @@ def __init_training_loader_factory(training_set, batch_size, data_path):
                                            name=training_set, loader_kwargs=kwargs)
 
 
-def __init_testing_loader(testing_sets, batch_size, data_path):
+def __init_testing_loader_factories(testing_sets, batch_size, data_path):
     # type: (typing.List[str], int, str)->typing.List[AbstractDataloaderFactory]
     """
-    Initialize and return the AbstractDataloaderFactory for the testing datasets specified.
+    Initialize and return the AbstractDataloaderFactories for the testing datasets specified.
     These factories are responsible for creating DataLoaders which provide testing samples
     to the network after training.
 
     :param testing_sets: names of the datasets to use for testing
     :param batch_size: number of anchor/positive pairs to include in a batch
     :param data_path: path to save data to or to read cached data from
-    :return: The AbstractDataloaderFactory that will create Dataloaders which
+    :return: The AbstractDataloaderFactories that will create Dataloaders which
              provide testing samples in pairs of batch size x 32 x 32 x 1 tensors
     """
     kwargs = {}

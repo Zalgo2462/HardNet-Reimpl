@@ -95,8 +95,6 @@ class HardNet:
 
         lr_scheduler = LambdaLR(optimizer, lr_schedule_fun, self.__current_epoch * num_batches_per_epoch)
 
-        # TODO: resume functionality omitted here, need to implement using the load function
-
         start_epoch = self.__current_epoch
         for epoch in range(start_epoch, end_epoch):
             self.__train_epoch(epoch, training_loader, optimizer, hardnet_loss, lr_scheduler, logger)
@@ -146,9 +144,10 @@ class HardNet:
     def __test_epoch(self, epoch, testing_loader, logger):
         # type: (HardNet, int, DataLoader, Logger)->None
         """
-
-        TODO: commenting and implementation
-        :return:
+        Run a single epoch of tests and report false positive rate through the provided logger.
+        :param epoch: current epoch the net is running in
+        :param testing_loader: DataLoader which provides testing samples in pairs of batch size x 32 x 32 x 1 tensors
+        :param logger: logging object to record false positive rates and other information
         """
         self.__module.eval()
 
