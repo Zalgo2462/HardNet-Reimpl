@@ -30,7 +30,7 @@ class PairPhotoTourTestLoaderFactory(AbstractDataloaderFactory):
             self.__batch_size,
             self.__data_root,
             self.__name,
-            self.__download
+            self.__download,
         ).get_data_loader(
             self.__loader_kwargs
         )

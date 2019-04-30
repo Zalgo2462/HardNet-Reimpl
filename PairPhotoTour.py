@@ -20,7 +20,7 @@ class PairPhotoTour(PhotoTour):
         :param download: whether or not to download samples if they are not already present
         """
         super().__init__(root=data_root, name=name, train=train, transform=transform, download=download)
-        self.__batch_size = batch_size
+        self._batch_size = batch_size
 
     def __getitem__(self, index):
         # type: (int)->Any
@@ -48,4 +48,4 @@ class PairPhotoTour(PhotoTour):
         HardNet model.
         :return: DataLoader that can provide training or testing samples to the model
         """
-        return DataLoader(self, batch_size=self.__batch_size, shuffle=False, **kwargs)
+        return DataLoader(self, batch_size=self._batch_size, shuffle=False, **kwargs)

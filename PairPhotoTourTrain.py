@@ -57,7 +57,7 @@ class PairPhotoTourTrain(PairPhotoTour):
         already_idxs = set()
 
         for x in range(num_pairs):
-            if len(already_idxs) >= self.__batch_size:
+            if len(already_idxs) >= self._batch_size:
                 already_idxs = set()
             c1 = np.random.randint(0, n_classes)
             while c1 in already_idxs:
