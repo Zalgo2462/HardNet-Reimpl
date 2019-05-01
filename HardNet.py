@@ -163,6 +163,54 @@ class HardNet:
 
         logger.log({'epoch': epoch, 'loss_value': loss_value, 'mode': 'train', 'reportable': True})
 
+    def get_fprs(self, testing_loader_factories):
+        fprs = []
+        for factory in testing_loader_factories:
+            testing_loader = factory.get_dataloader()
+
+            self.__module.eval()
+            distances, labels = [], []
+
+            with torch.no_grad():
+                for batch_index, (batch_anchors, batch_positives, batch_labels) in enumerate(testing_loader):
+                    # TODO: replace direct check for cuda.is_available()
+                    if torch.cuda.is_available():
+                        batch_anchors, batch_positives = batch_anchors.cuda(), batch_positives.cuda()
+                        # TODO: determine if following line is needed
+                        # batch_anchors, batch_positives = Variable(data_a), Variable(data_p)
+                    out_anchors = self.__module(batch_anchors)  # type: Tensor
+                    out_positives = self.__module(batch_positives)  # type: Tensor
+
+                    # dists = torch.sqrt(torch.sum((out_anchors - out_positives) ** 2, 1))
+                    dists = torch.sqrt(
+                        torch.sum(
+                            torch.pow(
+                                torch.add(
+                                    out_anchors,
+                                    torch.mul(
+                                        out_positives,
+                                        -1.0
+                                    )
+                                ),
+                                2.0
+                            ),
+                            (1,)
+                        )
+                    )
+
+                    distances.append(dists.data.cpu().numpy().flatten())
+
+                    labels.append(batch_labels.data.cpu().numpy().flatten())
+
+            labels_combined = np.hstack(labels)
+            distances_combined = np.hstack(distances)
+
+            false_positive_rate = false_positive_rate_at_95_recall(labels_combined, distances_combined)
+           
+            fprs.append(false_positive_rate)
+        return fprs 
+        
+
     def __test_epoch(self, epoch, testing_loader, logger, log_cycle):
         # type: (HardNet, int, DataLoader, Logger, int)->None
         """
