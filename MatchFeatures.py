@@ -42,7 +42,7 @@ def main():
     img2_patch_tensor = torch.FloatTensor(np.expand_dims(np.stack(img1_patches), axis=1))
 
     hardNet = HardNet(HardNetModule(), "")
-    #hardNet.load_checkpoint("TODO: CHECKPOINT")
+    hardNet.load_checkpoint("./data/models/linux13_run_1/checkpoint_9.pth")
     hn_desc1 = hardNet.create_descriptors(img1_patch_tensor).numpy()
     hn_desc2 = hardNet.create_descriptors(img2_patch_tensor).numpy()
 
