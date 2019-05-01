@@ -28,18 +28,20 @@ def main():
     weight_decay = 1e-4
     momentum = 0.9
     dampening = 0.9
+    margin = 1
+    epochs = 10
 
     logger_console = LoggerConsole()
     training_loader_factory = __init_training_loader_factory(training_set_name,
                                                              batch_size, data_path, logger_console, 10000)
     testing_loader_factories = __init_testing_loader_factories(testing_set_names, batch_size, data_path)
     optimizer_factory = SGDOptimizerFactory(learning_rate, weight_decay, momentum, dampening)
-    loss_triplet_margin = LossHardNetTripletMargin(1)
+    loss_triplet_margin = LossHardNetTripletMargin(margin)
     hard_net = HardNet(HardNetModule(), model_path)
 
     experiment_tag = platform.uname()[1] + "_run_1"
 
-    hard_net.train(training_loader_factory, testing_loader_factories, optimizer_factory, loss_triplet_margin, 10,
+    hard_net.train(training_loader_factory, testing_loader_factories, optimizer_factory, loss_triplet_margin, epochs,
                    experiment_tag, logger_console, 10)
 
     return
