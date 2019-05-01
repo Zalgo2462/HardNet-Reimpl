@@ -24,12 +24,16 @@ def main():
     batch_size = 1024
     data_path = 'data/sets/'
     model_path = 'data/models/'
+    learning_rate = 10.0
+    weight_decay = 1e-4
+    momentum = 0.9
+    dampening = 0.9
 
     logger_console = LoggerConsole()
     training_loader_factory = __init_training_loader_factory(training_set_name,
                                                              batch_size, data_path, logger_console, 10000)
     testing_loader_factories = __init_testing_loader_factories(testing_set_names, batch_size, data_path)
-    optimizer_factory = SGDOptimizerFactory(1, 0.0001, 0.9, 0.9)
+    optimizer_factory = SGDOptimizerFactory(learning_rate, weight_decay, momentum, dampening)
     loss_triplet_margin = LossHardNetTripletMargin(1)
     hard_net = HardNet(HardNetModule(), model_path)
 
