@@ -58,6 +58,18 @@ class HardNet:
         self.__current_epoch = checkpoint['epoch']
         self.__module.load_state_dict(checkpoint['state_dict'])
 
+    def create_descriptors(self, input):
+        """
+        #TODO: comment!
+        :param input:
+        :return:
+        """
+        with torch.no_grad():
+            if torch.cuda.is_available():
+                input = input.cuda()
+
+            return self.__module(input).cpu()
+
     def train(
             self,  # type: HardNet
             training_loader_factory,  # type: AbstractDataloaderFactory
