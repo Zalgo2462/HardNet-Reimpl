@@ -1,4 +1,4 @@
-import os
+import platform
 import typing
 
 import torch.cuda
@@ -27,15 +27,16 @@ def main():
 
     logger_console = LoggerConsole()
     training_loader_factory = __init_training_loader_factory(training_set_name,
-                                                             batch_size, data_path, logger_console, 100)
+                                                             batch_size, data_path, logger_console, 10000)
     testing_loader_factories = __init_testing_loader_factories(testing_set_names, batch_size, data_path)
     optimizer_factory = SGDOptimizerFactory(1, 0.0001, 0.9, 0.9)
     loss_triplet_margin = LossHardNetTripletMargin(1)
     hard_net = HardNet(HardNetModule(), model_path)
 
-    experiment_tag = os.uname()[1] + "_run_1"
+    experiment_tag = platform.uname()[1] + "_run_1"
+
     hard_net.train(training_loader_factory, testing_loader_factories, optimizer_factory, loss_triplet_margin, 10,
-                   experiment_tag, logger_console, 100)
+                   experiment_tag, logger_console, 10)
 
     return
 
